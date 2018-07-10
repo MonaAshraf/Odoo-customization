@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <!-- add Available Quantity to product form view  -->
+    
+    <record model="ir.ui.view" id="customize_product_temp_form_view">
+      <field name="inherit_id" ref="product.product_template_only_form_view"></field>
+      <field name="model">product.template</field>
+      <field name="arch" type="xml">
+        <field name="type" position="after">
+        <field name="available_quantity" widget="boolean"/>
+
+      </field>
+        <page name="sales" position="after">
+                  <page name="mealitem" string="Meal Item">
+                    <field name="meal" widget="one2many_list">
+                      <tree editable="bottom">
+                        <field name="name"/>
+                        <field name="user_id"/>
+                        <field name="notes"/>
+                        <field name="item_ids"/>
+
+                      </tree>
+                    </field>
+                  </page>
+          </page>      
+        </field>
+    </record>
+
+
+    <!-- add Available Quantity to tree view  -->
+    
+    <record model="ir.ui.view" id="customize_product_temp_tree_view">
+      <field name="inherit_id" ref="product.product_template_tree_view"></field>
+      <field name="model">product.template</field>
+      <field name="arch" type="xml">
+        <tree>
+        <field name="categ_id" position="after"/>
+        <field name="available_quantity"/>
+        </tree>
+      </field>
+    </record>
+
+   <!-- menu cheap products--> 
+
+
+        <record id="product_template_action_custom" model="ir.actions.act_window">
+            <field name="name">School Products</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.template</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="product.product_template_tree_view"/>
+            <field name="context">{"search_default_filter_to_sell":1}</field>
+
+            <field name="domain">[('available_quantity','=', True)]</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to define a new product.
+                </p>
+            </field>
+        </record>
+
+    
+        <menuitem action="product_template_action_custom"
+            id="customize_menu_product_template_action" 
+            parent="base.menu_sales" 
+            sequence="14" />
+
+   <!-- new menu to show meal model-->
+
+       <record id="Meal_menu_action_custom" model="ir.actions.act_window">
+            <field name="name">School Meals</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.users.meals</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_type">form</field>
+
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to define a new Meal.
+                </p>
+            </field>
+        </record>
+        <!-- create form view -->
+        <record model="ir.ui.view" id="customize_meal_form_view">
+          <field name="model">res.users.meals</field>
+          <field name="view_type">form</field>
+          <field name="arch" type="xml">
+            <form>
+              <group>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="meal_date"/>
+                <field name="notes"/>
+                <field name="total_serving"/>
+                
+              </group>
+              <notebook>
+                <page name="mealitem" string="Meal Item">
+                  <field name="item_ids" widget="one2many_list">
+                    <tree editable="bottom">
+                      <field name="item_id"/>
+                      <field name="serving"/>
+                      <field name="notes"/>
+                      <field name="available_quantity"/>
+                    </tree>
+                  </field>
+                </page>
+              </notebook>
+            </form>
+          </field>
+        </record>
+
+<!--create tree view  -->
+        <record model="ir.ui.view" id="customize_meal_tree_view">
+          <field name="model">res.users.meals</field>
+          <field name="arch" type="xml">
+            <tree>
+           
+            <field name="name"/>
+            <field name="notes"/>
+            <field name="meal_date"/>
+            <field name="user_id"/>
+            </tree>
+          </field>
+        </record>
+
+ <record id="customize_meal_kanban_view" model="ir.ui.view">
+           
+            <field name="model">res.users.meals</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="name"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <div class="o_kanban_image">
+                                    <img t-att-src="kanban_image('product.template', 'image_small')"/>
+                                </div>
+                                <div class="oe_kanban_details">
+                                    <strong>
+                                        <field name="name"/>
+                                    </strong>
+                                     <div name='tags'/>
+                                    <strong>
+                                       <span>User : <field name="user_id"/></span>
+                                    </strong>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+        <menuitem action="Meal_menu_action_custom"
+            id="customize_menu_Meal_action" 
+            parent="base.menu_sales" 
+            sequence="15" />
+
+
+      <!-- Report -->
+
+      <template id="product.School_meal">
+        <t t-call="report.html_container">
+          <t t-foreach="docs" t-as="o">
+            <t t-call="report.external_layout">
+              <div class="page">
+                <div class="oe_structure"/>
+                <h1>Test Report</h1>
+                <h2>Product Name: <span t-field="o.name"/></h2>
+                <p>Product Type: <span t-field="o.type"/></p>
+                <h3>Meal</h3>
+                <t t-foreach="o.meal" t-as="line">
+                  <div class="row">
+                    <div class="col-xs-6"><span t-field="line.name"/></div>
+                    <div class="col-xs-2"><span t-field="line.meal_date"/>
+                  </div>
+                    <div class="col-xs-4"><span t-field="line.user_id"/>
+                  </div>
+                </div>
+              </t> 
+            </div>
+          </t>
+        </t>
+      </t>
+    </template>
+
+        <report 
+            id="my_test_report"
+            string="Test Report"
+            model="product.template" 
+            report_type="qweb-pdf"
+            file="product.School_meal" 
+            name="product.School_meal" 
+        />
+
+
+
+
+
+
+
+
+    <!-- explicit list view definition -->
+    <!--
+    <record model="ir.ui.view" id="my-addons.list">
+      <field name="name">my-addons list</field>
+      <field name="model">my-addons.my-addons</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
+      </field>
+    </record>
+    -->
+
+    <!-- actions opening views on models -->
+    <!--
+    <record model="ir.actions.act_window" id="my-addons.action_window">
+      <field name="name">my-addons window</field>
+      <field name="res_model">my-addons.my-addons</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    -->
+
+    <!-- server action to the one above -->
+    <!--
+    <record model="ir.actions.server" id="my-addons.action_server">
+      <field name="name">my-addons server</field>
+      <field name="model_id" ref="model_my-addons_my-addons"/>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": self._name,
+        }
+      </field>
+    </record>
+    -->
+
+    <!-- Top menu item -->
+    <!--
+    <menuitem name="my-addons" id="my-addons.menu_root"/>
+    -->
+    <!-- menu categories -->
+    <!--
+    <menuitem name="Menu 1" id="my-addons.menu_1" parent="my-addons.menu_root"/>
+    <menuitem name="Menu 2" id="my-addons.menu_2" parent="my-addons.menu_root"/>
+    -->
+    <!-- actions -->
+    <!--
+    <menuitem name="List" id="my-addons.menu_1_list" parent="my-addons.menu_1"
+              action="my-addons.action_window"/>
+    <menuitem name="Server to list" id="my-addons" parent="my-addons.menu_2"
+              action="my-addons.action_server"/>
+    -->
+  </data>
+</openerp>
